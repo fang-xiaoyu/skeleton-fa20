@@ -16,12 +16,17 @@ public class UnionFind {
     /* Throws an exception if v1 is not a valid vertex. */
     private void validate(int v1) {
         // TODO
+        if (v1 < 0 || v1 >= parent.length) {
+            throw new IllegalArgumentException();
+        }
     }
 
     /* Returns the size of the set v1 belongs to. */
     public int sizeOf(int v1) {
-        int root = find(v1);
-        return -1 * parent[root];
+        if (parent[v1] < 0) {
+            return -parent[v1];
+        }
+        return sizeOf(parent[v1]);
     }
 
     /* Returns the parent of v1. If v1 is the root of a tree, returns the
@@ -33,6 +38,11 @@ public class UnionFind {
     /* Returns true if nodes v1 and v2 are connected. */
     public boolean isConnected(int v1, int v2) {
         // TODO
+        validate(v1);
+        validate(v2);
+        if (find(v1) == find(v2)) {
+            return true;
+        }
         return false;
     }
 
@@ -43,13 +53,54 @@ public class UnionFind {
        change the sets but may alter the internal structure of the data. */
     public void connect(int v1, int v2) {
         // TODO
+        validate(v1);
+        validate(v2);
+        if (isConnected(v1, v2)) {
+            return;
+        }
+        int rootV1 = find(v1);
+        int rootV2 = find(v2);
+        int sizeV1 = sizeOf(rootV1);
+        int sizeV2 = sizeOf(rootV2);
+
+        if (sizeV1 > sizeV2) {
+            parent[rootV2] = rootV1;
+            parent[rootV1] -= sizeV2;
+        } else {
+            parent[rootV1] = rootV2;
+            parent[rootV2] -= sizeV1;
+        }
     }
 
     /* Returns the root of the set v1 belongs to. Path-compression is employed
        allowing for fast search-time. */
     public int find(int v1) {
         // TODO
-        return -1;
+        validate(v1);
+        if (parent[v1] >= 0) {
+            if (parent[parent[v1]] >= 0) {
+                parent[v1] = parent[parent[v1]];
+            }
+            return find(parent[v1]);
+        } else {
+            return v1;
+        }
+    }
+
+    public static void main(String[] args) {
+        UnionFind uf = new UnionFind(10);
+        uf.connect(4, 3);
+        uf.connect(3, 8);
+        uf.connect(6, 5);
+        uf.connect(9, 4);
+        uf.connect(2, 1);
+        uf.connect(5, 0);
+        uf.connect(7, 2);
+        uf.connect(6, 1);
+        uf.connect(1, 0);
+        uf.connect(6, 8);
+        uf.find(8);
+        uf.find(4);
     }
 
 }
